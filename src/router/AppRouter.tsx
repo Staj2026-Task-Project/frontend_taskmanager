@@ -10,103 +10,110 @@ import { MyTasksPage } from "../pages/user/MyTasksPage";
 import { MyNotificationsPage } from "../pages/user/MyNotificationsPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { RoleGuard } from "./RoleGuard";
+import { AdminLayout } from "../components/layout/AdminLayout";
+import { UserLayout } from "../components/layout/UserLayout";
+import { ROUTES } from "../constants/routes";
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  return (
+    <ProtectedRoute>
+      <RoleGuard allowedRoles={["ROLE_ADMIN"]}>
+        <AdminLayout>{children}</AdminLayout>
+      </RoleGuard>
+    </ProtectedRoute>
+  );
+}
+
+function UserRoute({ children }: { children: React.ReactNode }) {
+  return (
+    <ProtectedRoute>
+      <RoleGuard allowedRoles={["ROLE_USER"]}>
+        <UserLayout>{children}</UserLayout>
+      </RoleGuard>
+    </ProtectedRoute>
+  );
+}
 
 export function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<Navigate to={ROUTES.login} replace />} />
 
-      <Route path="/login" element={<LoginPage />} />
+      <Route path={ROUTES.login} element={<LoginPage />} />
 
       <Route
-        path="/admin"
+        path={ROUTES.adminHome}
         element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={["ROLE_ADMIN"]}>
-              <AdminHomePage />
-            </RoleGuard>
-          </ProtectedRoute>
+          <AdminRoute>
+            <AdminHomePage />
+          </AdminRoute>
         }
       />
 
       <Route
-        path="/admin/users"
+        path={ROUTES.adminUsers}
         element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={["ROLE_ADMIN"]}>
-              <AdminUsersPage />
-            </RoleGuard>
-          </ProtectedRoute>
+          <AdminRoute>
+            <AdminUsersPage />
+          </AdminRoute>
         }
       />
 
       <Route
-        path="/admin/groups"
+        path={ROUTES.adminGroups}
         element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={["ROLE_ADMIN"]}>
-              <AdminGroupsPage />
-            </RoleGuard>
-          </ProtectedRoute>
+          <AdminRoute>
+            <AdminGroupsPage />
+          </AdminRoute>
         }
       />
 
       <Route
-        path="/admin/tasks"
+        path={ROUTES.adminTasks}
         element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={["ROLE_ADMIN"]}>
-              <AdminTasksPage />
-            </RoleGuard>
-          </ProtectedRoute>
+          <AdminRoute>
+            <AdminTasksPage />
+          </AdminRoute>
         }
       />
 
       <Route
-        path="/admin/tasks/create"
+        path={ROUTES.adminTaskCreate}
         element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={["ROLE_ADMIN"]}>
-              <TaskCreatePage />
-            </RoleGuard>
-          </ProtectedRoute>
+          <AdminRoute>
+            <TaskCreatePage />
+          </AdminRoute>
         }
       />
 
       <Route
-        path="/admin/tasks/assign"
+        path={ROUTES.adminTaskAssign}
         element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={["ROLE_ADMIN"]}>
-              <TaskAssignPage />
-            </RoleGuard>
-          </ProtectedRoute>
+          <AdminRoute>
+            <TaskAssignPage />
+          </AdminRoute>
         }
       />
 
       <Route
-        path="/user/tasks"
+        path={ROUTES.userTasks}
         element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={["ROLE_USER"]}>
-              <MyTasksPage />
-            </RoleGuard>
-          </ProtectedRoute>
+          <UserRoute>
+            <MyTasksPage />
+          </UserRoute>
         }
       />
 
       <Route
-        path="/user/notifications"
+        path={ROUTES.userNotifications}
         element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={["ROLE_USER"]}>
-              <MyNotificationsPage />
-            </RoleGuard>
-          </ProtectedRoute>
+          <UserRoute>
+            <MyNotificationsPage />
+          </UserRoute>
         }
       />
 
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to={ROUTES.login} replace />} />
     </Routes>
   );
 }
