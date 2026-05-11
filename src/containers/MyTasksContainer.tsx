@@ -1,3 +1,5 @@
+import { ErrorState } from "../components/feedback/ErrorState";
+import { LoadingState } from "../components/feedback/LoadingState";
 import { MyTaskList } from "../components/task/MyTaskList";
 import { useTaskAssignments, useUpdateTaskState } from "../hooks/useAssignments";
 import { useAuth } from "../hooks/useAuth";
@@ -30,11 +32,11 @@ export function MyTasksContainer() {
   }
 
   if (assignmentsQuery.isLoading) {
-    return <p>Görevler yükleniyor...</p>;
+    return <LoadingState message="Görevler yükleniyor..." />;
   }
 
   if (assignmentsQuery.error) {
-    return <p>Görevler alınamadı.</p>;
+    return <ErrorState message="Görevler alınamadı." />;
   }
 
   return (

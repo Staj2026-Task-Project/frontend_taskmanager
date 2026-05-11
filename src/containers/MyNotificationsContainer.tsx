@@ -1,3 +1,5 @@
+import { ErrorState } from "../components/feedback/ErrorState";
+import { LoadingState } from "../components/feedback/LoadingState";
 import { NotificationList } from "../components/notification/NotificationList";
 import { useAuth } from "../hooks/useAuth";
 import { useNotificationsByUserId } from "../hooks/useNotifications";
@@ -7,15 +9,15 @@ export function MyNotificationsContainer() {
   const notificationsQuery = useNotificationsByUserId(userId);
 
   if (!userId) {
-    return <p>Kullanıcı ID bulunamadı.</p>;
+    return <ErrorState message="Kullanıcı ID bulunamadı." />;
   }
 
   if (notificationsQuery.isLoading) {
-    return <p>Bildirimler yükleniyor...</p>;
+    return <LoadingState message="Bildirimler yükleniyor..." />;
   }
 
   if (notificationsQuery.error) {
-    return <p>Bildirimler alınamadı.</p>;
+    return <ErrorState message="Bildirimler alınamadı." />;
   }
 
   return (

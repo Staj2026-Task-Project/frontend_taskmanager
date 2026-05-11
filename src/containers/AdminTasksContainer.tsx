@@ -1,3 +1,5 @@
+import { ErrorState } from "../components/feedback/ErrorState";
+import { LoadingState } from "../components/feedback/LoadingState";
 import { TaskTable } from "../components/task/TaskTable";
 import { useTasks } from "../hooks/useTasks";
 
@@ -5,11 +7,11 @@ export function AdminTasksContainer() {
   const tasksQuery = useTasks();
 
   if (tasksQuery.isLoading) {
-    return <p>Tasklar yükleniyor...</p>;
+    return <LoadingState message="Tasklar yükleniyor..." />;
   }
 
   if (tasksQuery.error) {
-    return <p>Tasklar alınamadı.</p>;
+    return <ErrorState message="Tasklar alınamadı." />;
   }
 
   return (
