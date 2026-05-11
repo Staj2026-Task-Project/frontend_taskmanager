@@ -1,11 +1,13 @@
 import { useState } from "react";
+import {
+  TaskAssignForm,
+  type AssignmentTargetType,
+} from "../components/task/TaskAssignForm";
 import { useAssignTask } from "../hooks/useAssignments";
 import { useGroups } from "../hooks/useGroups";
 import { useTasks } from "../hooks/useTasks";
 import { useUsers } from "../hooks/useUsers";
 import type { TaskAssignRequest } from "../types/assignment.types";
-
-type AssignmentTargetType = "USER" | "GROUP" | "GROUP_MEMBER";
 
 export function TaskAssignContainer() {
   const tasksQuery = useTasks();
@@ -21,9 +23,7 @@ export function TaskAssignContainer() {
     groupId: undefined,
   });
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
+  function handleSubmit() {
     if (!formData.taskId) {
       return;
     }
@@ -52,82 +52,17 @@ export function TaskAssignContainer() {
     <section>
       <h2>Task Ata</h2>
 
-      <form onSubmit={handleSubmit}>
-        <select
-          value={formData.taskId}
-          onChange={(event) =>
-            setFormData((current) => ({
-              ...current,
-              taskId: Number(event.target.value),
-            }))
-          }
-        >
-          <option value={0}>Task seç</option>
-          {tasksQuery.data?.map((task) => (
-            <option key={task.id} value={task.id}>
-              #{task.id} - {task.title}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={targetType}
-          onChange={(event) => {
-            setTargetType(event.target.value as AssignmentTargetType);
-            setFormData((current) => ({
-              ...current,
-              userId: undefined,
-              groupId: undefined,
-            }));
-          }}
-        >
-          <option value="USER">Kullanıcıya ata</option>
-          <option value="GROUP">Gruba ata</option>
-          <option value="GROUP_MEMBER">Grup içindeki kullanıcıya ata</option>
-        </select>
-
-        {(targetType === "USER" || targetType === "GROUP_MEMBER") && (
-          <select
-            value={formData.userId ?? 0}
-            onChange={(event) =>
-              setFormData((current) => ({
-                ...current,
-                userId: Number(event.target.value),
-              }))
-            }
-          >
-            <option value={0}>Kullanıcı seç</option>
-            {usersQuery.data?.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.username}
-              </option>
-            ))}
-          </select>
-        )}
-
-        {(targetType === "GROUP" || targetType === "GROUP_MEMBER") && (
-          <select
-            value={formData.groupId ?? 0}
-            onChange={(event) =>
-              setFormData((current) => ({
-                ...current,
-                groupId: Number(event.target.value),
-              }))
-            }
-          >
-            <option value={0}>Grup seç</option>
-            {groupsQuery.data?.map((group) => (
-              <option key={group.id} value={group.id}>
-                {group.name}
-              </option>
-            ))}
-          </select>
-        )}
-
-        <button type="submit" disabled={assignTaskMutation.isPending}>
-          {assignTaskMutation.isPending ? "Atanıyor..." : "Task ata"}
-        </button>
-      </form>
+      <TaskAssignForm
+        value={formData}
+        targetType={targetType}
+        tasks={tasksQuery.data ?? []}
+        users={usersQuery.data ?? []}
+        groups={groupsQuery.data ?? []}
+        isSubmitting={assignTaskMutation.isPending}
+        onChange={setFormData}
+        onTargetTypeChange={setTargetType}
+        onSubmit={handleSubmit}
+      />
     </section>
   );
 }
