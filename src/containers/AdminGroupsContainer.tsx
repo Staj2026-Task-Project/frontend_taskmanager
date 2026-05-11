@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { AddUserToGroupForm } from "../components/group/AddUserToGroupForm";
+import { GroupCreateForm } from "../components/group/GroupCreateForm";
+import { GroupTable } from "../components/group/GroupTable";
 import { useAddUserToGroup, useCreateGroup, useGroups } from "../hooks/useGroups";
 import { useUsers } from "../hooks/useUsers";
 import type { GroupCreateRequest, UserGroupAddRequest } from "../types/group.types";
@@ -10,109 +13,69 @@ export function AdminGroupsContainer() {
   const createGroupMutation = useCreateGroup();
   const addUserToGroupMutation = useAddUserToGroup();
 
-  const [groupFormData, setGroupFormData] = useState<GroupCreateRequest>({
+  const initialGroupFormData: GroupCreateRequest = {
     name: "",
-  });
+  };
 
-  const [addUserFormData, setAddUserFormData] = useState<UserGroupAddRequest>({
+  const initialAddUserFormData: UserGroupAddRequest = {
     userId: 0,
     groupId: 0,
-  });
+  };
 
-  function handleCreateGroup(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const [groupFormData, setGroupFormData] =
+    useState<GroupCreateRequest>(initialGroupFormData);
 
+  const [addUserFormData, setAddUserFormData] =
+    useState<UserGroupAddRequest>(initialAddUserFormData);
+
+  function handleCreateGroup() {
     createGroupMutation.mutate(groupFormData, {
       onSuccess: () => {
-        setGroupFormData({ name: "" });
+        setGroupFormData(initialGroupFormData);
       },
     });
   }
 
-  function handleAddUserToGroup(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
+  function handleAddUserToGroup() {
     if (!addUserFormData.userId || !addUserFormData.groupId) {
       return;
     }
 
-    addUserToGroupMutation.mutate(addUserFormData);
+    addUserToGroupMutation.mutate(addUserFormData, {
+      onSuccess: () => {
+        setAddUserFormData(initialAddUserFormData);
+      },
+    });
   }
 
   return (
     <section>
       <h2>Grup Yönetimi</h2>
 
-      <form onSubmit={handleCreateGroup}>
-        <input
-          placeholder="Grup adı"
-          value={groupFormData.name}
-          onChange={(event) =>
-            setGroupFormData({
-              name: event.target.value,
-            })
-          }
-        />
-
-        <button type="submit" disabled={createGroupMutation.isPending}>
-          {createGroupMutation.isPending ? "Oluşturuluyor..." : "Grup oluştur"}
-        </button>
-      </form>
+      <GroupCreateForm
+        value={groupFormData}
+        isSubmitting={createGroupMutation.isPending}
+        onChange={setGroupFormData}
+        onSubmit={handleCreateGroup}
+      />
 
       <hr />
 
       <h3>Kullanıcıyı Gruba Ekle</h3>
 
-      <form onSubmit={handleAddUserToGroup}>
-        <select
-          value={addUserFormData.userId}
-          onChange={(event) =>
-            setAddUserFormData((current) => ({
-              ...current,
-              userId: Number(event.target.value),
-            }))
-          }
-        >
-          <option value={0}>Kullanıcı seç</option>
-          {usersQuery.data?.map((user) => (
-            <option key={user.id} value={user.id}>
-              {user.username}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={addUserFormData.groupId}
-          onChange={(event) =>
-            setAddUserFormData((current) => ({
-              ...current,
-              groupId: Number(event.target.value),
-            }))
-          }
-        >
-          <option value={0}>Grup seç</option>
-          {groupsQuery.data?.map((group) => (
-            <option key={group.id} value={group.id}>
-              {group.name}
-            </option>
-          ))}
-        </select>
-
-        <button type="submit" disabled={addUserToGroupMutation.isPending}>
-          {addUserToGroupMutation.isPending ? "Ekleniyor..." : "Gruba ekle"}
-        </button>
-      </form>
+      <AddUserToGroupForm
+        value={addUserFormData}
+        users={usersQuery.data ?? []}
+        groups={groupsQuery.data ?? []}
+        isSubmitting={addUserToGroupMutation.isPending}
+        onChange={setAddUserFormData}
+        onSubmit={handleAddUserToGroup}
+      />
 
       {groupsQuery.isLoading && <p>Gruplar yükleniyor...</p>}
       {groupsQuery.error && <p>Gruplar alınamadı.</p>}
 
-      <ul>
-        {groupsQuery.data?.map((group) => (
-          <li key={group.id}>
-            #{group.id} - {group.name} - {group.isActive ? "Aktif" : "Pasif"}
-          </li>
-        ))}
-      </ul>
+      <GroupTable groups={groupsQuery.data ?? []} />
     </section>
   );
 }
